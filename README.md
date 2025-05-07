@@ -1,2 +1,8 @@
 # kaggle_calc_submit_time
 kaggleの提出時間を計算してdiscordに送ってくれるコード
+
+## 使い方
+calc_submit_time.pyをターミナルから実行
+起動している間定期的にkaggleのサブを確認し、サブを検知したら監視開始
+
+完了後discordに通知がいく
