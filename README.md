@@ -1,0 +1,2 @@
+# kaggle_calc_submit_time
+kaggleの提出時間を計算してdiscordに送ってくれるコード
