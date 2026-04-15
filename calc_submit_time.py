@@ -6,21 +6,18 @@ import requests
 import os
 import json
 from pathlib import Path
-from kaggle.api.kaggle_api_extended import SubmissionStatus
+from kagglesdk.competitions.types.submission_status import SubmissionStatus
 import threading
 from queue import Queue
+from dotenv import load_dotenv
 
+load_dotenv()
 
-# Discord Webhook URLの設定
-DISCORD_WEBHOOK_URL = 'DISCORD_WEBHOOK_URL'  # ここにDiscordのWebhook URLを入力してください
-
-# 完了したサブミットを記録するファイル
-COMPLETED_SUBMISSIONS_FILE = 'completed_submissions.json'
-
-# APIリクエストの間隔（秒）
-API_REQUEST_INTERVAL = 60
-# エラー時の待機時間（秒）
-ERROR_WAIT_TIME = 300
+DISCORD_WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL', '')
+KAGGLE_COMPETITION = os.environ.get('KAGGLE_COMPETITION', 'birdclef-2026')
+COMPLETED_SUBMISSIONS_FILE = os.environ.get('COMPLETED_SUBMISSIONS_FILE', 'completed_submissions.json')
+API_REQUEST_INTERVAL = int(os.environ.get('API_REQUEST_INTERVAL', 60))
+ERROR_WAIT_TIME = int(os.environ.get('ERROR_WAIT_TIME', 300))
 
 # 日本時間のタイムゾーン
 JST = timezone(timedelta(hours=+9))
@@ -56,7 +53,7 @@ def send_discord_notification(message):
 def get_submission_status(api, submission_ref):
     """サブミットの現在の状態を取得"""
     try:
-        submissions = api.competition_submissions('birdclef-2025')
+        submissions = api.competition_submissions(KAGGLE_COMPETITION)
         for submission in submissions:
             if str(submission.ref) == str(submission_ref):
                 return submission.status, submission
@@ -153,7 +150,7 @@ def monitor_submissions():
     print("既存のサブミットを確認中...")
     
     try:
-        initial_submissions = api.competition_submissions('birdclef-2025')
+        initial_submissions = api.competition_submissions(KAGGLE_COMPETITION)
         # 最新の5サブミットのみを確認
         for submission in initial_submissions[:5]:
             if str(submission.ref) in completed_submissions:
@@ -189,7 +186,7 @@ def monitor_submissions():
     while True:
         try:
             # 最新のサブミットを取得
-            submissions = api.competition_submissions('birdclef-2025')
+            submissions = api.competition_submissions(KAGGLE_COMPETITION)
             time.sleep(API_REQUEST_INTERVAL)
             
             # 未完了のサブミットを監視
